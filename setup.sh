@@ -225,4 +225,5 @@ EOF
 # Attribution des droits et redémarrage
 sudo chown -R www-data:www-data /var/www/html
 sudo a2enmod php
+sudo rm /var/www/html/index.html
 sudo systemctl restart apache2
