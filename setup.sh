@@ -1,229 +1,257 @@
 #!/bin/bash
 
-# 1. Installation des dépendances
+# 1. Setup Environnement
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update -y
-sudo apt-get install -y apache2 php libapache2-mod-php # PHP pour les Live Metrics réels
+sudo apt-get install -y apache2
 
-# 2. Récupération des données système pour le premier affichage
+# Données système pour le dynamisme
 VM_NAME=$(hostname)
-IP_PUB=$(curl -s ifconfig.me)
+UPTIME=$(uptime -p)
 
-# --- Génération du fichier PHP pour le site interactif ---
-cat <<EOF > /var/www/html/index.php
-<?php
-// Petit script pour récupérer les metrics en temps réel
-\$load = sys_getloadavg();
-\$free_mem = shell_exec("free -m | grep Mem | awk '{print \$4}'");
-?>
+# --- Génération de l'Encyclopédie Interactive Azure ---
+cat <<EOF > /var/www/html/index.html
 <!DOCTYPE html>
-<html lang="fr" data-theme="dark">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azure Architecture Masterclass</title>
+    <title>Masterclass Azure | ITSCM</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        :root[data-theme="dark"] {
-            --bg: #030712; --card-bg: rgba(255, 255, 255, 0.03);
-            --text: #f3f4f6; --text-muted: #9ca3af; --border: rgba(255, 255, 255, 0.1);
-            --accent: #0078d4; --accent-glow: rgba(0, 120, 212, 0.3);
+        :root { 
+            --az-blue: #0078d4; 
+            --az-cyan: #00f2ff;
+            --bg-dark: #02040a;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-white: rgba(255, 255, 255, 0.08);
         }
-        :root[data-theme="light"] {
-            --bg: #f9fafb; --card-bg: #ffffff;
-            --text: #111827; --text-muted: #4b5563; --border: #e5e7eb;
-            --accent: #0078d4; --accent-glow: rgba(0, 120, 212, 0.1);
-        }
-
+        
         body { 
-            background: var(--bg); color: var(--text); 
-            font-family: 'Inter', system-ui, sans-serif; 
-            transition: background 0.3s, color 0.3s;
-            overflow-x: hidden;
+            background: var(--bg-dark); 
+            color: #d1d5db; 
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            margin: 0;
         }
 
-        /* --- Parallaxe Background --- */
-        #parallax-bg {
-            position: fixed; top: 0; left: 0; width: 110%; height: 110%;
-            background: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 70%);
-            z-index: -1; transition: transform 0.1s ease-out;
-        }
+        /* --- Scroll Progress --- */
+        #progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 3px; background: transparent; z-index: 10001; }
+        #progress-bar { width: 0%; height: 100%; background: linear-gradient(to right, var(--az-blue), var(--az-cyan)); }
 
-        /* --- Theme Toggle --- */
-        .theme-switch {
-            position: fixed; top: 20px; right: 20px; z-index: 10002;
-            cursor: pointer; padding: 10px; border-radius: 50%;
-            background: var(--card-bg); border: 1px solid var(--border);
-        }
-
-        /* --- Breadcrumbs --- */
-        .breadcrumb-nav { font-size: 0.8rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
-
-        /* --- Glass Cards --- */
-        .glass-card {
-            background: var(--card-bg); backdrop-filter: blur(10px);
-            border: 1px solid var(--border); border-radius: 20px;
-            padding: 2rem; transition: 0.3s ease; cursor: pointer; height: 100%;
-        }
-        .glass-card:hover { border-color: var(--accent); transform: translateY(-5px); }
-        .card-expand { max-height: 0; opacity: 0; overflow: hidden; transition: 0.5s ease; }
-        .active .card-expand { max-height: 1000px; opacity: 1; margin-top: 1.5rem; }
-
-        /* --- Table Styling --- */
-        .compare-table { width: 100%; font-size: 0.9rem; border-collapse: collapse; }
-        .compare-table th, .compare-table td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
-        .compare-table th { color: var(--accent); }
-
-        /* --- Metrics Badge --- */
-        .metric-badge { background: rgba(0, 120, 212, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 5px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; }
-
-        .glossary-term { color: var(--accent); border-bottom: 1px dashed var(--accent); cursor: help; }
-
-        /* --- Intro Animation --- */
-        #intro-screen {
-            position: fixed; inset: 0; background: #000; z-index: 10005;
+        /* --- Intro Sophistiquée --- */
+        #intro-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: 0.8s ease-in-out;
+            transition: transform 0.8s cubic-bezier(0.7, 0, 0.3, 1);
         }
+        .boot-sequence { font-family: 'Consolas', monospace; color: var(--az-cyan); font-size: 0.9rem; max-width: 500px; }
+
+        /* --- Grid & Cards --- */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-white);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            height: 100%;
+        }
+        .glass-card:hover {
+            border-color: var(--az-blue);
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-5px);
+        }
+        .card-expand {
+            max-height: 0; opacity: 0; overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        .glass-card.active .card-expand { max-height: 1000px; opacity: 1; margin-top: 1.5rem; }
+        
+        .icon-box {
+            width: 45px; height: 45px; background: rgba(0, 120, 212, 0.15);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; color: var(--az-cyan); margin-bottom: 1rem;
+        }
+
+        .category-tag { font-size: 0.7rem; font-weight: 700; color: var(--az-blue); text-transform: uppercase; letter-spacing: 1px; }
+        .chevron { transition: transform 0.3s; color: var(--az-blue); font-size: 0.8rem; }
+        .glass-card.active .chevron { transform: rotate(180deg); }
+
+        .btn-itscm { background: #fff; color: #000; font-weight: 700; border-radius: 10px; padding: 12px 30px; text-decoration: none; transition: 0.3s; }
+        .btn-itscm:hover { box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); transform: scale(1.02); }
+
     </style>
 </head>
 <body>
 
-    <div id="parallax-bg"></div>
+    <div id="progress-container"><div id="progress-bar"></div></div>
 
-    <div class="theme-switch" onclick="toggleTheme()">
-        <i id="theme-icon" class="fas fa-moon"></i>
+    <div id="intro-overlay">
+        <div class="boot-sequence" id="boot-text"></div>
+        <button class="btn btn-outline-light mt-5" id="btn-ready" style="display:none;" onclick="startApp()">Initialiser la connaissance</button>
     </div>
 
-    <div id="intro-screen">
-        <div class="text-center">
-            <div class="spinner-border text-primary mb-3" role="status"></div>
-            <p class="font-monospace text-primary">INITIALIZING_AZURE_DASHBOARD...</p>
-        </div>
-    </div>
-
-    <main class="container py-5 mt-4">
-        <nav class="breadcrumb-nav mb-3">Azure > Infrastructure > ITSCM_Project</nav>
-        
-        <header class="mb-5">
-            <h1 class="display-4 fw-bold">Architecture Cloud & Automation</h1>
-            <div class="d-flex gap-3 mt-3">
-                <span class="metric-badge"><i class="fas fa-microchip me-1"></i> CPU Load: <?php echo \$load[0]; ?></span>
-                <span class="metric-badge"><i class="fas fa-memory me-1"></i> Free RAM: <?php echo \$free_mem; ?> MB</span>
-                <span class="metric-badge"><i class="fas fa-network-wired me-1"></i> VM: $VM_NAME</span>
-            </div>
+    <main class="container py-5" style="opacity:0; transition: opacity 1s;" id="app-content">
+        <header class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-white">Le Guide Suprême Azure</h1>
+            <p class="text-secondary fs-5 mx-auto" style="max-width: 800px;">
+                Du concept physique au déploiement par code : comprenez pourquoi le Cloud Microsoft est le moteur de l'industrie 4.0.
+            </p>
         </header>
 
         <div class="row g-4">
+            <div class="col-md-6">
+                <div class="glass-card" onclick="this.classList.toggle('active')">
+                    <div class="d-flex justify-content-between">
+                        <span class="category-tag">Fondamentaux</span>
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="icon-box mt-2"><i class="fas fa-cloud"></i></div>
+                    <h4>01. C'est quoi le Cloud ?</h4>
+                    <div class="card-expand">
+                        <p>Le Cloud Computing est la fourniture de services informatiques (serveurs, stockage, bases de données, réseaux, logiciels) via Internet.</p>
+                        <p class="small text-secondary">Au lieu de posséder et d'entretenir des centres de données physiques, les entreprises accèdent à la puissance technologique de manière flexible. <br><br>
+                        <strong>Les trois piliers :</strong><br>
+                        • <strong>L'Agilité :</strong> Déployez des ressources en quelques minutes.<br>
+                        • <strong>L'Élasticité :</strong> Payez pour ce que vous utilisez et ajustez la puissance selon la demande réelle.<br>
+                        • <strong>L'Économie d'échelle :</strong> Microsoft achète le matériel en masse, réduisant les coûts pour l'utilisateur final.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="glass-card" onclick="this.classList.toggle('active')">
+                    <div class="d-flex justify-content-between">
+                        <span class="category-tag">L'Écosystème</span>
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="icon-box mt-2"><i class="fab fa-microsoft"></i></div>
+                    <h4>02. C'est quoi Azure ?</h4>
+                    <div class="card-expand">
+                        <p>Azure est la plateforme Cloud de Microsoft. C'est un réseau mondial de plus de 200 centres de données hautement sécurisés.</p>
+                        <p class="small text-secondary">Ce n'est pas qu'un site web, c'est un système d'exploitation géant pour la planète. <br><br>
+                        • <strong>Portée Mondiale :</strong> Présent dans plus de 60 régions, Azure garantit que vos données sont proches de vos utilisateurs, réduisant la latence (le temps de réponse).<br>
+                        • <strong>Confiance :</strong> Azure possède le plus grand nombre de certifications de conformité au monde (RGPD, ISO, HIPAA).</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-12">
                 <div class="glass-card" onclick="this.classList.toggle('active')">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3><i class="fas fa-exchange-alt me-2 text-primary"></i> On-Premise vs Cloud Azure</h3>
-                        <i class="fas fa-chevron-down"></i>
+                    <div class="d-flex justify-content-between">
+                        <span class="category-tag">Capacités</span>
+                        <i class="fas fa-chevron-down chevron"></i>
                     </div>
+                    <div class="icon-box mt-2"><i class="fas fa-rocket"></i></div>
+                    <h4>03. Possibilités & Utilité</h4>
                     <div class="card-expand">
-                        <p>L'<strong>On-Premise</strong> désigne l'hébergement "dans le placard" : vous possédez physiquement les serveurs. Le <strong>Cloud</strong> est une dématérialisation totale.</p>
-                        <table class="compare-table mt-3">
-                            <thead>
-                                <tr><th>Critère</th><th>On-Premise (Classique)</th><th>Azure (Cloud)</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>Coût Initial</td><td>Élevé (CapEx) - Achat matériel</td><td>Nul (OpEx) - Paiement à l'usage</td></tr>
-                                <tr><td>Maintenance</td><td>Équipe dédiée requise 24/7</td><td>Gérée par Microsoft</td></tr>
-                                <li>Sécurité</td><td>Physique (Verrous, Alarme)</td><td>Cyber-sécurité de classe mondiale</td></tr>
-                                <tr><td>Scalabilité</td><td>Lente (Commander du matos)</td><td>Instantanée (Auto-scaling)</td></tr>
-                            </tbody>
-                        </table>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-white">À quoi ça sert ?</h6>
+                                <p class="small text-secondary">Absolument tout : héberger des sites web, stocker des pétaoctets de données, créer des applications mobiles, ou gérer des usines connectées (IoT).</p>
+                            </div>
+                            <div class="col-md-6 border-start border-secondary ps-4">
+                                <h6 class="text-white">L'IA & Big Data</h6>
+                                <p class="small text-secondary">Azure est le leader de l'IA (partenaire d'OpenAI). Vous pouvez utiliser des modèles comme GPT-4 directement dans vos serveurs pour analyser vos données ou créer des agents intelligents.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-md-6">
                 <div class="glass-card" onclick="this.classList.toggle('active')">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3><i class="fab fa-microsoft me-2 text-primary"></i> L'Univers Azure</h3>
-                        <i class="fas fa-chevron-down"></i>
+                    <div class="d-flex justify-content-between">
+                        <span class="category-tag">Carrière</span>
+                        <i class="fas fa-chevron-down chevron"></i>
                     </div>
+                    <div class="icon-box mt-2"><i class="fas fa-users-cog"></i></div>
+                    <h4>04. Pour qui & Quels métiers ?</h4>
                     <div class="card-expand">
-                        <p>Azure est le moteur de services de Microsoft. Ce n'est pas qu'une VM, c'est une <span class="glossary-term" title="L'ensemble des technologies REST qui permettent de piloter Azure par code">API Géante</span>. Tout objet créé est défini par un fichier <span class="glossary-term" title="JavaScript Object Notation : Le format texte universel pour les données">JSON</span>.</p>
-                        <p class="small text-muted">A quoi ça sert ? Pour les <strong>Développeurs</strong>, ça offre des outils de déploiement continu. Pour les <strong>Data Scientists</strong>, une puissance de calcul IA infinie.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="glass-card" onclick="this.classList.toggle('active')">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3><i class="fas fa-book me-2 text-primary"></i> Petit Lexique</h3>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="card-expand">
-                        <ul class="list-unstyled">
-                            <li><strong>IaC :</strong> Infrastructure as Code. On écrit le serveur au lieu de le cliquer.</li>
-                            <li><strong>VNET :</strong> Réseau Virtuel. Votre périmètre privé dans le Cloud.</li>
-                            <li><strong>SLA :</strong> Garantie de temps de fonctionnement (ex: 99.9%).</li>
-                            <li><strong>RGPD :</strong> Conformité européenne pour la protection des données.</li>
+                        <ul class="small text-secondary">
+                            <li><strong class="text-white">Cloud Architect :</strong> Conçoit les plans de l'infrastructure globale.</li>
+                            <li><strong class="text-white">DevOps Engineer :</strong> Automatise le déploiement du code (IaC).</li>
+                            <li><strong class="text-white">Data Engineer :</strong> Gère le flux massif de données et les bases SQL/NoSQL.</li>
+                            <li><strong class="text-white">Security Engineer :</strong> Surveille les menaces et configure les pare-feu.</li>
                         </ul>
+                        <p class="small">C'est intéressant pour toute entreprise voulant supprimer la maintenance matérielle pour se concentrer sur son métier.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="glass-card" onclick="this.classList.toggle('active')">
+                    <div class="d-flex justify-content-between">
+                        <span class="category-tag">Technique</span>
+                        <i class="fas fa-chevron-down chevron"></i>
+                    </div>
+                    <div class="icon-box mt-2"><i class="fas fa-file-code"></i></div>
+                    <h4>05. Sous le capot : JSON & REST API</h4>
+                    <div class="card-expand">
+                        <p>C'est ici que réside la magie de l'IaC. Dans Azure, <span class="text-white fw-bold">chaque ressource est un objet JSON.</span></p>
+                        <p class="small text-secondary">Quand vous créez un serveur via le portail, Azure envoie en réalité une requête <strong>REST API</strong> au contrôleur Azure (ARM). <br><br>
+                        Puisque tout est géré par des messages JSON, nous pouvons stocker la configuration d'un datacenter complet dans un simple fichier texte. C'est ce qui permet de déployer ce serveur via un script sans intervention humaine.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        
-
-        <div class="mt-5 p-5 glass-card text-center" style="border: 2px dashed var(--accent);">
-            <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
-            <h2>Rapport de Projet & Laboratoire Technique</h2>
-            <p class="text-secondary mb-4">Ce document contient l'intégralité de la démarche, les captures d'écran des configurations Azure et le code source Bash utilisé pour ce déploiement.</p>
-            <a href="https://itscm-my.sharepoint.com/:b:/g/personal/o_jabali_student_itscm_be/IQC2vN0pAVt3SKqbYJUpSco2Aa-icoyjwF3PYmD36Jr0okk?e=TXazKe" target="_blank" class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold">
-                <i class="fas fa-download me-2"></i> LIEN VERS PDF DU PROJET (LABORATOIRE)
-            </a>
+        <div class="mt-5 text-center">
+            <div class="p-5 glass-card" style="cursor: default;">
+                <h3 class="text-white">Portail de Connaissance</h3>
+                <p class="text-secondary mb-4">Accédez au manuel technique SharePoint pour explorer les travaux pratiques détaillés de cette session.</p>
+                <a href="https://itscm-my.sharepoint.com/:b:/g/personal/o_jabali_student_itscm_be/IQC2vN0pAVt3SKqbYJUpSco2Aa-icoyjwF3PYmD36Jr0okk?e=TXazKe" target="_blank" class="btn-itscm">
+                    <i class="fas fa-file-pdf me-2"></i> Consulter le Manuel (SharePoint)
+                </a>
+            </div>
         </div>
 
-        <footer class="mt-5 text-center text-muted small pb-5">
-            Node: $VM_NAME | Public IP: $IP_PUB<br>
-            Projet Académique | ITSCM | 2026
+        <footer class="mt-5 py-4 border-top border-secondary text-center text-secondary small">
+            <p>Déploiement Automatisé | Node: $VM_NAME | $UPTIME</p>
+            <p>© 2026 - Institut Technique Cardinal Mercier</p>
         </footer>
     </main>
 
     <script>
-        // Parallaxe
-        document.addEventListener('mousemove', (e) => {
-            const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
-            const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
-            document.getElementById('parallax-bg').style.transform = \`translate(\${moveX}px, \${moveY}px)\`;
-        });
+        // Progress Bar
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+        };
 
-        // Theme Toggle
-        function toggleTheme() {
-            const root = document.documentElement;
-            const icon = document.getElementById('theme-icon');
-            if (root.getAttribute('data-theme') === 'dark') {
-                root.setAttribute('data-theme', 'light');
-                icon.className = 'fas fa-sun';
+        // Boot Sequence
+        const lines = [
+            "> Initialisation des modules Azure...",
+            "> Connexion API Management : OK",
+            "> Parsing des objets JSON : SUCCESS",
+            "> Déploiement du Dashboard ITSCM...",
+            "> Système prêt."
+        ];
+        let i = 0;
+        function type() {
+            if (i < lines.length) {
+                document.getElementById('boot-text').innerHTML += lines[i] + "<br>";
+                i++; setTimeout(type, 300);
             } else {
-                root.setAttribute('data-theme', 'dark');
-                icon.className = 'fas fa-moon';
+                document.getElementById('btn-ready').style.display = 'block';
             }
         }
+        type();
 
-        // Animation de fin d'intro
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('intro-screen').style.opacity = '0';
-                setTimeout(() => document.getElementById('intro-screen').style.display = 'none', 800);
-            }, 1000);
-        });
+        function startApp() {
+            document.getElementById('intro-overlay').style.transform = 'translateY(-100%)';
+            document.getElementById('app-content').style.opacity = '1';
+        }
     </script>
 </body>
 </html>
 EOF
 
-# Attribution des droits et redémarrage
-sudo chown -R www-data:www-data /var/www/html
-sudo a2enmod php
-sudo rm /var/www/html/index.html
 sudo systemctl restart apache2
